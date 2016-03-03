@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Windows;
 using Microsoft.AspNet.SignalR.Client;
+using System.Threading;
 
 namespace SnapUpWinClient
 {
@@ -21,7 +22,17 @@ namespace SnapUpWinClient
             var querystringData = new Dictionary<string, string>();
             querystringData.Add("PCId", "1"); // PCId is "1"
             var hubConnection = new HubConnection("http://localhost/MVCWebApp/", querystringData);
-            var hubProxy = hubConnection.CreateHubProxy("SnapUpServer");
+            IHubProxy hubProxy = hubConnection.CreateHubProxy("SnapUpServer");
+            var syncContext = SynchronizationContext.Current;
+            hubProxy.On("notify", () =>
+                // Context is a reference to SynchronizationContext.Current
+                syncContext.Post(delegate
+                {
+                    Debug.Write("Notified!\n");
+                    queryBus();
+                }, null)
+            );
+
             hubConnection.Start().ContinueWith(task => {
                 if (task.IsFaulted)
                 {
@@ -37,6 +48,11 @@ namespace SnapUpWinClient
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
+        {
+            queryBus();
+        }
+
+        private void queryBus()
         {
             var assetURL = string.Empty;
             using (var webClient = new WebClient())
