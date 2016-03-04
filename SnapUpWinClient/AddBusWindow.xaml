@@ -1,0 +1,30 @@
+﻿<Window x:Class="SnapUpWinClient.AddBusWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SnapUpWinClient"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="Add Bus" Height="108.674" Width="390.306" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+    <Grid>
+        <Grid HorizontalAlignment="Left" Height="80" VerticalAlignment="Top" Width="384">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="9*"/>
+                <RowDefinition Height="9*"/>
+                <RowDefinition Height="2*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="63*"/>
+                <ColumnDefinition Width="230*"/>
+                <ColumnDefinition Width="83*"/>
+                <ColumnDefinition Width="8*"/>
+            </Grid.ColumnDefinitions>
+            <Label x:Name="labelCode" Content="Code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15,10,0,0" Width="48" Height="26"/>
+            <TextBox x:Name="textBoxCode" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Margin="0,13,0,0" Grid.Column="1"/>
+            <Button x:Name="addBusWindowConfirm" Content="Add Bus" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="155,16,0,0" Grid.Column="1" Grid.Row="1" Click="AddBusWindowConfirm_Click"/>
+            <Button x:Name="addBusWindowCancel" Content="Cancel" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="8,16,0,0" Grid.Column="2" Grid.Row="1" Click="AddBusWindowCancel_Click"/>
+        </Grid>
+
+    </Grid>
+</Window>
