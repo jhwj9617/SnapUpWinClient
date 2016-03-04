@@ -9,6 +9,7 @@ using System.Threading;
 using System.Xml.Serialization;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.ComponentModel;
 
 namespace SnapUpWinClient
 {
@@ -94,17 +95,9 @@ namespace SnapUpWinClient
 
         private String GetSelectedRowCode()
         {
-            String identifier = "";
-            TextBlock rowIdentifier;
-            foreach (UIElement child in this.selectedRowGrid.Children)
-            {
-                if (child.GetType() == typeof(TextBlock))
-                {
-                    rowIdentifier = (TextBlock)child;
-                    identifier = rowIdentifier.Text;
-                }
-            }
-            return identifier;
+            String name = this.selectedRowGrid.Name;
+            // remove the underscore
+            return name.Substring(1, name.Length-1);
         } 
 
         private void RenderBusDestinations()
@@ -122,6 +115,7 @@ namespace SnapUpWinClient
         private Grid RenderRow(BusDestination bd, int i)
         {
             Grid rowGrid = new Grid();
+            rowGrid.Name = "_" + bd.code;
             rowGrid.Height = 50;
             rowGrid.Background = Brushes.Transparent;
 
@@ -148,15 +142,15 @@ namespace SnapUpWinClient
             rowProgressBar.Margin = new Thickness(340, 0, 0, 0);
 
             // rowIdentifier
-            TextBlock rowIdentifier = new TextBlock();
-            rowIdentifier.Name = "RowIdentifier" + i.ToString();
-            rowIdentifier.Text = bd.code;
-            rowIdentifier.Visibility = Visibility.Hidden;
+            //TextBlock rowIdentifier = new TextBlock();
+            //rowIdentifier.Name = "RowIdentifier" + i.ToString();
+            //rowIdentifier.Text = bd.code;
+            //rowIdentifier.Visibility = Visibility.Hidden;
 
             rowGrid.Children.Add(rowLabel);
             rowGrid.Children.Add(rowDownloadLoc);
             rowGrid.Children.Add(rowProgressBar);
-            rowGrid.Children.Add(rowIdentifier);
+            //rowGrid.Children.Add(rowIdentifier);
             StackPanel.Height = 50 * this.rowCount;
             StackPanel.Children.Add(rowGrid);
 
@@ -177,9 +171,30 @@ namespace SnapUpWinClient
             new FileInfo(localFilename).Directory.Create();
             using (WebClient client = new WebClient())
             {
-                client.DownloadFile(assetURL, localFilename);
+                client.DownloadFileCompleted += new AsyncCompletedEventHandler(DownloadCompleted);
+                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
+                client.DownloadFileAsync(new Uri(assetURL), localFilename, downloadDestination);
             }
+            
+        }
+
+        private void DownloadCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            string downloadDestination = (String)e.UserState;
             Process.Start(downloadDestination);
+        }
+
+        private void ProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            Grid rowGrid = (Grid) LogicalTreeHelper.FindLogicalNode(StackPanel, "_1234abcd");
+            foreach (UIElement child in rowGrid.Children)
+            {
+                if (child.GetType() == typeof(ProgressBar))
+                {
+                    ProgressBar pb = (ProgressBar) child;
+                    pb.Value = e.ProgressPercentage;
+                }
+            }
         }
 
         private void AddBus_Click(object sender, RoutedEventArgs e)
