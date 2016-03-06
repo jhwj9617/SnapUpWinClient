@@ -5,13 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SnapUpWinClient"
         mc:Ignorable="d"
-        Title="SnapUp Client Manager" Height="402" Width="603" ResizeMode="NoResize" Background="White">
+        Title="SnapUp Client Manager" Height="420" Width="603" ResizeMode="NoResize" Background="White">
     <Grid Background="#FFF0F0F0">
-        <Button x:Name="AddBus" Content="Add Bus" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="74" Click="AddBus_Click" Height="47"/>
+        <Button x:Name="AddBus" Content="Add Bus" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="90" Click="AddBus_Click" Height="47"/>
+        <Button x:Name="BusProperties" Content="Bus Properties" HorizontalAlignment="Left" Margin="105,10,0,0" VerticalAlignment="Top" Width="90" Click="EditBus_Click" Height="47" IsEnabled="False" />
+        <Button x:Name="DeleteBus" Content="Delete Bus" HorizontalAlignment="Left" VerticalAlignment="Top" Width="95" Margin="200,10,0,0" Height="47" IsEnabled="False" Click="DeleteBus_Click"/>
         <ScrollViewer x:Name="ScrollViewer" HorizontalAlignment="Left" Height="301" Margin="10,62,0,0" VerticalAlignment="Top" Width="577" BorderThickness="0" Background="White">
-            <StackPanel x:Name="StackPanel" Height="0" Width="558" VerticalAlignment="Top">
+            <Border BorderBrush="DarkGray" BorderThickness="1">
+                <StackPanel x:Name="StackPanel" Height="0" Width="558" VerticalAlignment="Top">
 
-            </StackPanel>
+                </StackPanel>
+            </Border>
         </ScrollViewer>
     </Grid>
 </Window>

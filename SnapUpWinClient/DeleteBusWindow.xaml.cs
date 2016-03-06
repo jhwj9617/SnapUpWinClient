@@ -17,32 +17,31 @@ using System.Windows.Shapes;
 namespace SnapUpWinClient
 {
     /// <summary>
-    /// Interaction logic for AddBusWindow.xaml
+    /// Interaction logic for DeleteBusWindow.xaml
     /// </summary>
-    public partial class AddBusWindow : Window
+    public partial class DeleteBusWindow : Window
     {
         private BusDestination busDestination;
+        private bool messageBoxResult = false;
 
-        public AddBusWindow(BusDestination busDestination)
+        public DeleteBusWindow(BusDestination busDestination)
         {
             this.busDestination = busDestination;
             InitializeComponent();
-
-            textBoxCode.Focus();
         }
 
-        private void AddBusWindowCancel_Click(object sender, RoutedEventArgs e)
+        private void No_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        private void AddBusWindowConfirm_Click(object sender, RoutedEventArgs e)
+        private void Yes_Click(object sender, RoutedEventArgs e)
         {
             this.IsEnabled = false;
             string requestResponse = String.Empty;
             using (var webClient = new WebClient())
             {
-                requestResponse = webClient.DownloadString("http://localhost/MVCWebApp/Buses/PairBus?id=1&code=" + textBoxCode.Text);
+                requestResponse = webClient.DownloadString("http://localhost/MVCWebApp/Buses/UnpairBus?id=1&code=" + busDestination.code);
                 this.IsEnabled = true;
             }
             if (requestResponse == "403")
@@ -55,20 +54,16 @@ namespace SnapUpWinClient
                 Debug.Write(requestResponse + ": Bus not found.\n");
                 MessageBox.Show(requestResponse + ": Bus not found.", "Error");
             }
-            else if (requestResponse == "409")
-            {
-                Debug.Write(requestResponse + ": Bus already paired.\n");
-                MessageBox.Show(requestResponse + ": Bus already paired.", "Error");
-            }
             else if (requestResponse == "200")
             {
-                Debug.Write(requestResponse + ": Success. Bus paired.\n");
-                this.busDestination.code = textBoxCode.Text;
-                this.busDestination.busName = "example";
-                this.busDestination.downloadLocation = null;
-                this.busDestination.openFolder = true;
+                this.messageBoxResult = true;
                 this.Close();
             }
+        }
+
+        public bool GetMessageBoxResult()
+        {
+            return this.messageBoxResult;
         }
     }
 }

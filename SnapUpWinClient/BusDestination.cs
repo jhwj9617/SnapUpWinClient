@@ -16,11 +16,12 @@ namespace SnapUpWinClient
 
         public BusDestination() { }
 
-        public BusDestination(String code, String busName, String downloadLocation)
+        public BusDestination(String code, String busName, String downloadLocation, bool openFolder)
         {
             this.code = code;
             this.busName = busName;
             this.downloadLocation = downloadLocation;
+            this.openFolder = openFolder;
         }
     }
 }

@@ -1,0 +1,36 @@
+﻿<Window x:Class="SnapUpWinClient.BusPropertiesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SnapUpWinClient"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="Bus Properties" Height="210.333" Width="431" ResizeMode="NoResize" Margin="0" SizeToContent="WidthAndHeight">
+    <Grid Background="#FFF0F0F0" HorizontalAlignment="Left" Width="425" Height="181" VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="19*"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="12*"/>
+            <ColumnDefinition Width="114*"/>
+            <ColumnDefinition Width="276*"/>
+            <ColumnDefinition Width="15*"/>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="BusNameLabel" Content="Bus Name:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,18,0,0" Grid.Column="2" Height="26" Width="78"/>
+        <TextBlock x:Name="BusNameContent" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0,23,0,0" Grid.Column="3" Height="16" Width="49"/>
+        <Label x:Name="CodeLabel" Content="Code:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,44,0,0" Grid.Column="2" Height="26" Width="59"/>
+        <TextBlock x:Name="CodeContent" HorizontalAlignment="Left" TextWrapping="Wrap" VerticalAlignment="Top" Margin="0,49,0,0" Grid.Column="3" Height="16" Width="49"/>
+        <Label x:Name="DownloadLocationLabel" Content="Download Location:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,75,0,0" Grid.Column="2" Height="26" Width="119" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="DownloadLocationContent" IsReadOnly="True"  HorizontalAlignment="Left" Height="24" VerticalAlignment="Top" Width="216" Grid.Column="3" Margin="0,77,0,0"/>
+        <Button x:Name="DownloadLocationChange" Content="Change" HorizontalAlignment="Left" VerticalAlignment="Top" Width="55" Grid.Column="3" Margin="221,78,0,0" Click="DownloadLocationChange_Click"/>
+        <Label x:Name="AutoOpenFolderLabel" Content="Auto Open Folder:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,106,0,0" Grid.Column="2" Height="26" Width="111"/>
+        <CheckBox x:Name="AutoOpenFolderCheckBox" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="3" Margin="0,112,0,0" Height="15" Width="17"/>
+        <Separator Grid.ColumnSpan="3" Margin="0,127,0,17" Grid.Column="1"/>
+        <Button x:Name="OpenFolder" Content="Open Folder" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="3" Margin="41,152,0,0" Height="20" Click="OpenFolder_Click"/>
+        <Button x:Name="OK" Content="OK" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="3" Margin="121,152,0,0" Click="OK_Click" Height="20"/>
+        <Button x:Name="Cancel" Content="Cancel" VerticalAlignment="Top" Grid.Column="3" Margin="201,152,0,0" Click="Cancel_Click" Height="20" HorizontalAlignment="Left" Width="75"/>
+    </Grid>
+</Window>
