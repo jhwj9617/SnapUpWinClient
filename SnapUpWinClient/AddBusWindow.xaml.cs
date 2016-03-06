@@ -42,7 +42,7 @@ namespace SnapUpWinClient
             string requestResponse = String.Empty;
             using (var webClient = new WebClient())
             {
-                requestResponse = webClient.DownloadString("http://localhost/MVCWebApp/Buses/PairBus?id=1&code=" + textBoxCode.Text);
+                requestResponse = webClient.DownloadString("http://localhost/MVCWebApp/Buses/PairBus?id=" + Application.Current.Properties["PCId"] + "&code=" + textBoxCode.Text);
                 this.IsEnabled = true;
             }
             if (requestResponse == "403")

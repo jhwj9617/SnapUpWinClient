@@ -13,6 +13,7 @@ using System.ComponentModel;
 using System.Windows.Documents;
 using System.Windows.Navigation;
 using System.Windows.Input;
+using System.Configuration;
 using Newtonsoft.Json;
 using Hardcodet.Wpf.TaskbarNotification;
 
@@ -33,11 +34,10 @@ namespace SnapUpWinClient
 
         public MainWindow()
         {
-            // PCId = 1
-            // Code = 1234abcd
+            InitializeClientId();
             // Initiate connection, establish notifications
             var querystringData = new Dictionary<string, string>();
-            querystringData.Add("PCId", "1"); // PCId is "1"
+            querystringData.Add("PCId", (String) Application.Current.Properties["PCId"]);
             var hubConnection = new HubConnection("http://localhost/MVCWebApp/", querystringData);
             IHubProxy hubProxy = hubConnection.CreateHubProxy("SnapUpServer");
             var syncContext = SynchronizationContext.Current;
@@ -84,6 +84,34 @@ namespace SnapUpWinClient
             // Get TaskbarIcon
             InitializeTaskbarIcon();
             RenderBusDestinations();
+        }
+
+        private void InitializeClientId()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            int PCId = Int32.Parse(config.AppSettings.Settings["PCId"].Value);
+            if (PCId == -1)
+            {
+                Debug.Write("NO CLIENT ID: REQUESTING NEW ID");
+                // Wipe BusDestinationList
+                serializer = new XmlSerializer(typeof(BusDestinationList), busDestinationTypes);
+                FileStream fs = new FileStream("BusDestinationList.xml", FileMode.Create);
+                serializer.Serialize(fs, new BusDestinationList());
+                fs.Close();
+                string requestResponse = String.Empty;
+                this.IsEnabled = false;
+                using (var webClient = new WebClient())
+                {
+                    requestResponse = webClient.DownloadString("http://localhost/MVCWebApp/PersonalComputers/Create");
+                }
+                this.IsEnabled = true;
+                config.AppSettings.Settings["PCId"].Value = requestResponse;
+                config.Save(ConfigurationSaveMode.Modified);
+                Application.Current.Properties["PCId"] = requestResponse;
+            } else
+            {
+                Application.Current.Properties["PCId"] = PCId.ToString();
+            }
         }
 
         private void InitializeTaskbarIcon()
@@ -299,6 +327,9 @@ namespace SnapUpWinClient
                 serializer.Serialize(fs, this.busDestinationList);
                 fs.Close();
                 this.RemoveBusDestination(busDest);
+                this.selectedRowGrid = null;
+                this.BusProperties.IsEnabled = false;
+                this.DeleteBus.IsEnabled = false;
             }
         }
 
