@@ -65,8 +65,7 @@ namespace SnapUpWinClient
                 Debug.Write(requestResponse + ": Success. Bus paired.\n");
                 this.busDestination.code = textBoxCode.Text;
                 this.busDestination.busName = "example";
-                this.busDestination.downloadLocation = null;
-                this.busDestination.openFolder = true;
+                this.busDestination.openFolder = false;
                 this.Close();
             }
         }

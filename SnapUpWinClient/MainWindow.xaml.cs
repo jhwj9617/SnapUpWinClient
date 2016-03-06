@@ -13,6 +13,8 @@ using System.ComponentModel;
 using System.Windows.Documents;
 using System.Windows.Navigation;
 using System.Windows.Input;
+using Newtonsoft.Json;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace SnapUpWinClient
 {
@@ -24,6 +26,7 @@ namespace SnapUpWinClient
         public BusDestinationList busDestinationList;
         Type[] busDestinationTypes = { typeof(BusDestination) };
         XmlSerializer serializer;
+        TaskbarIcon taskbarIcon;
 
         public int rowCount = 0;
         public Grid selectedRowGrid;
@@ -78,28 +81,64 @@ namespace SnapUpWinClient
 
             InitializeComponent();
 
+            // Get TaskbarIcon
+            InitializeTaskbarIcon();
             RenderBusDestinations();
+        }
+
+        private void InitializeTaskbarIcon()
+        {
+            taskbarIcon = (TaskbarIcon)FindResource("TaskbarIcon");
+            taskbarIcon.TrayLeftMouseDown += TaskbarIcon_Click;
+            MenuItem exitApp = new MenuItem();
+            exitApp.Header = "Exit";
+            exitApp.Click += this.ExitApp;
+            ContextMenu contextMenu = new ContextMenu();
+            contextMenu.Items.Add(exitApp);
+            taskbarIcon.ContextMenu = contextMenu;
+            taskbarIcon.Visibility = Visibility.Visible;
+        }
+
+        private void ExitApp(object sender, RoutedEventArgs e)
+        {
+            taskbarIcon.Dispose();
+            Application.Current.Shutdown();
+        }
+
+        // Prevent application from closing
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
         }
 
         private void QueryBus(string code)
         {
+            HttpWebRequest request = (HttpWebRequest) WebRequest.Create("http://localhost/MVCWebApp/Buses/QueryBus?code=" + code);
             string assetURL = String.Empty;
-            using (var webClient = new WebClient())
+            string assetName = String.Empty;
+            using (WebResponse jsonResponse = request.GetResponse())
             {
-                assetURL = webClient.DownloadString("http://localhost/MVCWebApp/Buses/QueryBus?code=" + code);
+                StreamReader streamReader = new StreamReader(jsonResponse.GetResponseStream());
+                String responseData = streamReader.ReadToEnd();
+                QueryBusResponse jsonData = JsonConvert.DeserializeObject<QueryBusResponse>(responseData);
+                // process your data
+                assetURL = jsonData.assetUrl;
+                assetName = jsonData.assetName;
             }
             BusDestination busDest = this.FindBusDestination(code);
             Debug.Write("Received URL: " + assetURL + "\n");
-            string downloadLocation = busDest.downloadLocation != null ? busDest.downloadLocation : (String)Application.Current.Properties["myPicturesLocation"];
-            string localFilename = Path.Combine(downloadLocation, @"SnapUp\newFile.jpg");
+            string downloadLocation = busDest.downloadLocation;
+            string localFilename = Path.Combine(downloadLocation, assetName);
             new FileInfo(localFilename).Directory.Create();
             using (WebClient client = new WebClient())
             {
-                client.DownloadFileCompleted += new AsyncCompletedEventHandler((sender, e) => DownloadCompleted(sender, e, busDest));
+                taskbarIcon.CloseBalloon();
+                taskbarIcon.ShowBalloonTip("Downloading...", assetName, BalloonIcon.None);
+                client.DownloadFileCompleted += new AsyncCompletedEventHandler((sender, e) => DownloadCompleted(sender, e, busDest, assetName));
                 client.DownloadProgressChanged += new DownloadProgressChangedEventHandler((sender, e) => ProgressChanged(sender, e, busDest));
                 client.DownloadFileAsync(new Uri(assetURL), localFilename, (String) Application.Current.Properties["defaultDownloadLocation"]);
             }
-            
         }
 
         private void OpenBusProperties()
@@ -117,9 +156,7 @@ namespace SnapUpWinClient
 
                 Label rowDownloadLoc = (Label)LogicalTreeHelper.FindLogicalNode(StackPanel, "DownloadLoc" + busDest.code);
                 Hyperlink newHyperlink = (Hyperlink)rowDownloadLoc.Content;
-                newHyperlink.NavigateUri = busDest.downloadLocation != null ?
-                    new Uri(busDest.downloadLocation) :
-                    new Uri((String)Application.Current.Properties["defaultDownloadLocation"]);
+                newHyperlink.NavigateUri = new Uri(busDest.downloadLocation);
             }
         }
 
@@ -170,9 +207,7 @@ namespace SnapUpWinClient
 
             // rowDownloadLoc
             Hyperlink hyperlink = new Hyperlink();
-            hyperlink.NavigateUri = bd.downloadLocation != null ?
-                new Uri(bd.downloadLocation) :
-                new Uri((String)Application.Current.Properties["defaultDownloadLocation"]);
+            hyperlink.NavigateUri = new Uri(bd.downloadLocation);
             hyperlink.Inlines.Add(new Run("Open File Location"));
             hyperlink.RequestNavigate += OpenFileLocation_RequestNavigate;
             Label rowDownloadLoc = new Label();
@@ -273,19 +308,31 @@ namespace SnapUpWinClient
             e.Handled = true;
         }
 
-        private void DownloadCompleted(object sender, AsyncCompletedEventArgs e, BusDestination busDest)
+        private void DownloadCompleted(object sender, AsyncCompletedEventArgs e, BusDestination busDest, string assetName)
         {
-            string downloadDestination = (String) e.UserState;
+            taskbarIcon.CloseBalloon();
+            taskbarIcon.ShowBalloonTip("Download Complete", "Successfully downloaded " + assetName, BalloonIcon.None);
+            taskbarIcon.TrayBalloonTipClicked += new RoutedEventHandler((sender1, e1) => taskbarIcon_TrayBalloonTipClicked(sender1, e1, busDest.downloadLocation));
             if (busDest.openFolder == true)
             {
-                Process.Start(downloadDestination);
+                Process.Start(busDest.downloadLocation);
             }
+        }
+
+        private void taskbarIcon_TrayBalloonTipClicked(object sender, RoutedEventArgs e, string downloadLocation)
+        {
+            Process.Start(downloadLocation);
         }
 
         private void ProgressChanged(object sender, DownloadProgressChangedEventArgs e, BusDestination busDest)
         {
             ProgressBar pb = (ProgressBar) LogicalTreeHelper.FindLogicalNode(StackPanel, "ProgressBar" + busDest.code);
             pb.Value = e.ProgressPercentage;
+        }
+
+        private void TaskbarIcon_Click(object sender, EventArgs e)
+        {
+            this.Show();
         }
 
         // ** HELPER FUNCTIONS ** //

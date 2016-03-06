@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Xml.Serialization;
 
 namespace SnapUpWinClient
@@ -14,14 +15,10 @@ namespace SnapUpWinClient
         public String downloadLocation;
         public bool openFolder;
 
-        public BusDestination() { }
-
-        public BusDestination(String code, String busName, String downloadLocation, bool openFolder)
+        public BusDestination()
         {
-            this.code = code;
-            this.busName = busName;
-            this.downloadLocation = downloadLocation;
-            this.openFolder = openFolder;
+            // DownloadLocation is initially default
+            this.downloadLocation = (String) Application.Current.Properties["myPicturesLocation"] + @"\SnapUp";
         }
     }
 }

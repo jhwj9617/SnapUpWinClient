@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:SnapUpWinClient"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
-        Title="Delete Bus" Height="140.817" Width="279.337" SizeToContent="WidthAndHeight">
-    <Grid Background="#FFF0F0F0" Margin="0,0,0,-21" Height="131" VerticalAlignment="Top" HorizontalAlignment="Left" Width="269">
+        Title="Delete Bus" Height="140.817" Width="279.337" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
+    <Grid Background="#FFF0F0F0" Margin="0,0,-6,-19" Height="131" VerticalAlignment="Top" HorizontalAlignment="Left" Width="279">
         <Grid.RowDefinitions>
             <RowDefinition Height="25*"/>
             <RowDefinition Height="3*"/>

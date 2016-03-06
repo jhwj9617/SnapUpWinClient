@@ -34,9 +34,7 @@ namespace SnapUpWinClient
 
             this.BusNameContent.Text = busDestination.busName;
             this.CodeContent.Text = busDestination.code;
-            this.originalDownloadLoc = busDestination.downloadLocation == null ?
-                (String)Application.Current.Properties["defaultDownloadLocation"] :
-                busDestination.downloadLocation;
+            this.originalDownloadLoc = busDestination.downloadLocation;
             this.DownloadLocationContent.Text = this.originalDownloadLoc;
 
             this.originalOpenFolder = busDestination.openFolder;
