@@ -72,6 +72,7 @@ namespace SnapUpWinClient
                 fs.Close();
             } catch (FileNotFoundException ex)
             {
+                Debug.Write(ex.ToString());
                 // BusDestinationList.xml not created yet. Create empty list.
                 busDestinationList = new BusDestinationList();
             }
