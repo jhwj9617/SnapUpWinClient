@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Configuration;
 using Newtonsoft.Json;
 using Hardcodet.Wpf.TaskbarNotification;
+using System.Text;
 
 namespace SnapUpWinClient
 {
@@ -31,11 +32,12 @@ namespace SnapUpWinClient
 
         public int rowCount = 0;
         public Grid selectedRowGrid;
+        public WebHelperFunctions WebHelper = new WebHelperFunctions();
 
         public MainWindow()
         {
             InitializeClientId();
-            // Initiate connection, establish notifications
+            // Initiate connection with kept PCId, establish notifications
             var querystringData = new Dictionary<string, string>();
             querystringData.Add("PCId", (String) Application.Current.Properties["PCId"]);
             var hubConnection = new HubConnection("http://localhost/MVCWebApp/", querystringData);
@@ -98,16 +100,27 @@ namespace SnapUpWinClient
                 FileStream fs = new FileStream("BusDestinationList.xml", FileMode.Create);
                 serializer.Serialize(fs, new BusDestinationList());
                 fs.Close();
-                string requestResponse = String.Empty;
                 this.IsEnabled = false;
-                using (var webClient = new WebClient())
+                if (!WebHelper.CheckConnection())
                 {
-                    requestResponse = webClient.DownloadString("http://localhost/MVCWebApp/PersonalComputers/Create");
+                    MessageBox.Show("Using SnapUp Client Manager for the first time requires you to be connected to the internet. Please connect.", "Error");
+                    return;
                 }
-                this.IsEnabled = true;
-                config.AppSettings.Settings["PCId"].Value = requestResponse;
-                config.Save(ConfigurationSaveMode.Modified);
-                Application.Current.Properties["PCId"] = requestResponse;
+                string statusCode = String.Empty;
+                string statusMessage = String.Empty;
+                int newPCId;
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/MVCWebApp/PersonalComputers/Create");
+                using (WebResponse jsonResponse = request.GetResponse())
+                {
+                    dynamic jsonData = WebHelper.JSONResponseToObject(jsonResponse);
+                    statusCode = jsonData.statusCode;
+                    statusMessage = jsonData.statusMessage;
+                    newPCId = jsonData.PCId;
+                    this.IsEnabled = true;
+                    config.AppSettings.Settings["PCId"].Value = newPCId.ToString();
+                    config.Save(ConfigurationSaveMode.Modified);
+                    Application.Current.Properties["PCId"] = newPCId.ToString();
+                }
             } else
             {
                 Application.Current.Properties["PCId"] = PCId.ToString();
@@ -142,30 +155,45 @@ namespace SnapUpWinClient
 
         private void QueryBus(string code)
         {
-            HttpWebRequest request = (HttpWebRequest) WebRequest.Create("http://localhost/MVCWebApp/Buses/QueryBus?code=" + code);
+            if (!WebHelper.CheckConnection())
+            {
+                taskbarIcon.ShowBalloonTip("Cannot download asset", "You are not connected to the internet...", BalloonIcon.Error);
+                return;
+            }
+            HttpWebRequest request = (HttpWebRequest) WebRequest.Create("http://localhost/MVCWebApp/Buses/QueryBus?pc" + 
+                "id=" + (String)Application.Current.Properties["PCId"] + 
+                "&code=" + code);
+            string statusCode = String.Empty;
+            string statusMessage = String.Empty;
             string assetURL = String.Empty;
             string assetName = String.Empty;
             using (WebResponse jsonResponse = request.GetResponse())
             {
-                StreamReader streamReader = new StreamReader(jsonResponse.GetResponseStream());
-                String responseData = streamReader.ReadToEnd();
-                QueryBusResponse jsonData = JsonConvert.DeserializeObject<QueryBusResponse>(responseData);
-                // process your data
+                dynamic jsonData = WebHelper.JSONResponseToObject(jsonResponse);
+                // grab from jsonobject
+                statusCode = jsonData.statusCode;
+                statusMessage = jsonData.statusMessage;
                 assetURL = jsonData.assetUrl;
                 assetName = jsonData.assetName;
             }
-            BusDestination busDest = this.FindBusDestination(code);
-            Debug.Write("Received URL: " + assetURL + "\n");
-            string downloadLocation = busDest.downloadLocation;
-            string localFilename = Path.Combine(downloadLocation, assetName);
-            new FileInfo(localFilename).Directory.Create();
-            using (WebClient client = new WebClient())
+            if (statusCode == "200")
             {
-                taskbarIcon.CloseBalloon();
-                taskbarIcon.ShowBalloonTip("Downloading...", assetName, BalloonIcon.None);
-                client.DownloadFileCompleted += new AsyncCompletedEventHandler((sender, e) => DownloadCompleted(sender, e, busDest, assetName));
-                client.DownloadProgressChanged += new DownloadProgressChangedEventHandler((sender, e) => ProgressChanged(sender, e, busDest));
-                client.DownloadFileAsync(new Uri(assetURL), localFilename, (String) Application.Current.Properties["defaultDownloadLocation"]);
+                BusDestination busDest = this.FindBusDestination(code);
+                Debug.Write("Received URL: " + assetURL + "\n");
+                string downloadLocation = busDest.downloadLocation;
+                string localFilename = Path.Combine(downloadLocation, assetName);
+                new FileInfo(localFilename).Directory.Create();
+                using (WebClient client = new WebClient())
+                {
+                    taskbarIcon.CloseBalloon();
+                    taskbarIcon.ShowBalloonTip("Downloading...", assetName, BalloonIcon.None);
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler((sender, e) => DownloadCompleted(sender, e, busDest, assetName));
+                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler((sender, e) => ProgressChanged(sender, e, busDest));
+                    client.DownloadFileAsync(new Uri(assetURL), localFilename, (String)Application.Current.Properties["defaultDownloadLocation"]);
+                }
+            } else
+            {
+                // Log some information somewhere
             }
         }
 

@@ -23,6 +23,7 @@ namespace SnapUpWinClient
     {
         private BusDestination busDestination;
         private bool messageBoxResult = false;
+        private WebHelperFunctions WebHelper = new WebHelperFunctions();
 
         public DeleteBusWindow(BusDestination busDestination)
         {
@@ -37,24 +38,28 @@ namespace SnapUpWinClient
 
         private void Yes_Click(object sender, RoutedEventArgs e)
         {
+            if (!WebHelper.CheckConnection())
+            {
+                MessageBox.Show("Using this function requires you to be connected to the internet. Please reconnect.", "Error");
+                return;
+            }
             this.IsEnabled = false;
-            string requestResponse = String.Empty;
-            using (var webClient = new WebClient())
+            string statusCode = String.Empty;
+            string statusMessage = String.Empty;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/MVCWebApp/Buses/UnpairBus?id=" + Application.Current.Properties["PCId"] + "&code=" + busDestination.code);
+            using (WebResponse jsonResponse = request.GetResponse())
             {
-                requestResponse = webClient.DownloadString("http://localhost/MVCWebApp/Buses/UnpairBus?id=" + Application.Current.Properties["PCId"] + "&code=" + busDestination.code);
-                this.IsEnabled = true;
+                dynamic jsonData = WebHelper.JSONResponseToObject(jsonResponse);
+                statusCode = jsonData.statusCode;
+                statusMessage = jsonData.statusMessage;
             }
-            if (requestResponse == "403")
+            this.IsEnabled = true;
+            if (statusCode == "403" || statusCode == "404")
             {
-                Debug.Write(requestResponse + ": User not found. Please reinstall SnapUpWinClient.\n");
-                MessageBox.Show(requestResponse + ": User not found. Please reinstall SnapUpWinClient.", "Error");
+                Debug.Write(statusCode + ": " + statusMessage + ".\n");
+                MessageBox.Show(statusCode + ": " + statusMessage + ".\n", "Error");
             }
-            else if (requestResponse == "404")
-            {
-                Debug.Write(requestResponse + ": Bus not found.\n");
-                MessageBox.Show(requestResponse + ": Bus not found.", "Error");
-            }
-            else if (requestResponse == "200")
+            else if (statusCode == "200")
             {
                 this.messageBoxResult = true;
                 this.Close();
