@@ -40,7 +40,7 @@ namespace SnapUpWinClient
             // Initiate connection with kept PCId, establish notifications
             var querystringData = new Dictionary<string, string>();
             querystringData.Add("PCId", (String) Application.Current.Properties["PCId"]);
-            var hubConnection = new HubConnection("http://localhost/MVCWebApp/", querystringData);
+            var hubConnection = new HubConnection(WebHelper.GetRootUrl(), querystringData);
             IHubProxy hubProxy = hubConnection.CreateHubProxy("SnapUpServer");
             var syncContext = SynchronizationContext.Current;
             hubProxy.On("BusUpdate", (string code) =>
@@ -59,7 +59,7 @@ namespace SnapUpWinClient
                     Debug.Write("There was an error opening the connection\n");
                 }
                 else {
-                    Debug.Write("Connected to " + "http://localhost/MVCWebApp/" + "\n");
+                    Debug.Write("Connected to " + WebHelper.GetRootUrl() + "\n");
                 }
             }).Wait();
 
@@ -92,7 +92,7 @@ namespace SnapUpWinClient
         private void InitializeClientId()
         {
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            int PCId = Int32.Parse(config.AppSettings.Settings["PCId"].Value);
+            int PCId = Int32.Parse(ConfigurationManager.AppSettings["PCId"]);
             if (PCId == -1)
             {
                 Debug.Write("NO CLIENT ID: REQUESTING NEW ID");
@@ -110,7 +110,7 @@ namespace SnapUpWinClient
                 string statusCode = String.Empty;
                 string statusMessage = String.Empty;
                 int newPCId;
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/MVCWebApp/PersonalComputers/Create");
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WebHelper.GetRootUrl() + "/PersonalComputers/Create");
                 using (WebResponse jsonResponse = request.GetResponse())
                 {
                     dynamic jsonData = WebHelper.JSONResponseToObject(jsonResponse);
@@ -161,7 +161,7 @@ namespace SnapUpWinClient
                 taskbarIcon.ShowBalloonTip("Cannot download asset", "You are not connected to the internet...", BalloonIcon.Error);
                 return;
             }
-            HttpWebRequest request = (HttpWebRequest) WebRequest.Create("http://localhost/MVCWebApp/Buses/QueryBus?pc" + 
+            HttpWebRequest request = (HttpWebRequest) WebRequest.Create(WebHelper.GetRootUrl() + "/Buses/QueryBus?pc" + 
                 "id=" + (String)Application.Current.Properties["PCId"] + 
                 "&code=" + code);
             string statusCode = String.Empty;

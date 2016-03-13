@@ -46,7 +46,7 @@ namespace SnapUpWinClient
             this.IsEnabled = false;
             string statusCode = String.Empty;
             string statusMessage = String.Empty;
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create("http://localhost/MVCWebApp/Buses/UnpairBus?id=" + Application.Current.Properties["PCId"] + "&code=" + busDestination.code);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WebHelper.GetRootUrl() + "/Buses/UnpairBus?id=" + Application.Current.Properties["PCId"] + "&code=" + busDestination.code);
             using (WebResponse jsonResponse = request.GetResponse())
             {
                 dynamic jsonData = WebHelper.JSONResponseToObject(jsonResponse);

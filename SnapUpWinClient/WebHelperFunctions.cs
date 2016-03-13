@@ -14,6 +14,12 @@ namespace SnapUpWinClient
     {
         public WebHelperFunctions() {}
 
+        #if DEBUG
+               public const string RootUrl = "http://localhost/MVCWebApp";
+        #else
+               public const string RootUrl = "http://snapup.apphb.com";
+        #endif
+
         public Object JSONResponseToObject(WebResponse jsonResponse)
         {
             Stream stream = jsonResponse.GetResponseStream();
@@ -38,6 +44,11 @@ namespace SnapUpWinClient
             {
                 return false;
             }
+        }
+
+        public string GetRootUrl()
+        {
+            return RootUrl;
         }
     }
 }
