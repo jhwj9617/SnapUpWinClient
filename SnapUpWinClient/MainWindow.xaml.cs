@@ -161,7 +161,7 @@ namespace SnapUpWinClient
                 taskbarIcon.ShowBalloonTip("Cannot download asset", "You are not connected to the internet...", BalloonIcon.Error);
                 return;
             }
-            HttpWebRequest request = (HttpWebRequest) WebRequest.Create(WebHelper.GetRootUrl() + "/Buses/QueryBus?pc" + 
+            HttpWebRequest request = (HttpWebRequest) WebRequest.Create(WebHelper.GetRootUrl() + "/Buses/QueryBus?PC" + 
                 "id=" + (String)Application.Current.Properties["PCId"] + 
                 "&code=" + code);
             string statusCode = String.Empty;
