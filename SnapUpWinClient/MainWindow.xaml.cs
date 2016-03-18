@@ -25,6 +25,7 @@ namespace SnapUpWinClient
     /// </summary>
     public partial class MainWindow : Window
     {
+        HubConnection hubConnection;
         public BusDestinationList busDestinationList;
         Type[] busDestinationTypes = { typeof(BusDestination) };
         XmlSerializer serializer;
@@ -40,7 +41,7 @@ namespace SnapUpWinClient
             // Initiate connection with kept PCId, establish notifications
             var querystringData = new Dictionary<string, string>();
             querystringData.Add("PCId", (String) Application.Current.Properties["PCId"]);
-            var hubConnection = new HubConnection(WebHelper.GetRootUrl(), querystringData);
+            hubConnection = new HubConnection(WebHelper.GetRootUrl(), querystringData);
             IHubProxy hubProxy = hubConnection.CreateHubProxy("SnapUpServer");
             var syncContext = SynchronizationContext.Current;
             hubProxy.On("BusUpdate", (string code) =>
@@ -143,6 +144,7 @@ namespace SnapUpWinClient
 
         private void ExitApp(object sender, RoutedEventArgs e)
         {
+            hubConnection.Stop();
             taskbarIcon.Dispose();
             Application.Current.Shutdown();
         }
