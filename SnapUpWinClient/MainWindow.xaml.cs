@@ -258,7 +258,7 @@ namespace SnapUpWinClient
             // RowLabel
             Label rowLabel = new Label();
             rowLabel.Name = "BusNameLabel" + bd.code;
-            rowLabel.Content = "Bus Name: " + bd.busName + " | " + bd.code;
+            rowLabel.Content = bd.busName;
             rowLabel.Width = 180;
             rowLabel.VerticalAlignment = VerticalAlignment.Center;
             rowLabel.HorizontalAlignment = HorizontalAlignment.Left;

@@ -47,12 +47,14 @@ namespace SnapUpWinClient
             this.IsEnabled = false;
             string statusCode = String.Empty;
             string statusMessage = String.Empty;
+            string busName = String.Empty;
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(WebHelper.GetRootUrl() + "/Buses/PairBus?PCid=" + Application.Current.Properties["PCId"] + "&code=" + textBoxCode.Text);
             using (WebResponse jsonResponse = request.GetResponse())
             {
                 dynamic jsonData = WebHelper.JSONResponseToObject(jsonResponse);
                 statusCode = jsonData.statusCode;
                 statusMessage = jsonData.statusMessage;
+                busName = jsonData.busName;
             }
             this.IsEnabled = true;
             if (statusCode == "403" || statusCode == "404" || statusCode == "409")
@@ -64,7 +66,7 @@ namespace SnapUpWinClient
             {
                 Debug.Write(statusCode + ": Success. Bus paired.\n");
                 this.busDestination.code = textBoxCode.Text;
-                this.busDestination.busName = "example";
+                this.busDestination.busName = busName;
                 this.busDestination.openFolder = false;
                 this.Close();
             }
