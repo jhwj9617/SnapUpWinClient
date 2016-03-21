@@ -37,8 +37,9 @@ namespace SnapUpWinClient
                 request.Credentials = CredentialCache.DefaultNetworkCredentials;
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
+                response.Close();
+
                 if (response.StatusCode == HttpStatusCode.OK) {
-                    response.Close();
                     return true;
                 } else
                 {
